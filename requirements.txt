@@ -1,0 +1,6 @@
+asyncpg
+fastapi
+slowapi
+pydantic
+pytest
+pytest-asyncio

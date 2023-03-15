@@ -1,0 +1,3 @@
+#!/bin/bash
+
+scp *.py root@185.204.0.180:/opt/tst/

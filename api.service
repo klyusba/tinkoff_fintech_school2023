@@ -1,0 +1,14 @@
+[Unit]
+Description=API for FinTechSchool
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=api
+WorkingDirectory=/opt/tst/
+ExecStart=/opt/tst/run
+
+[Install]
+WantedBy=multi-user.target
