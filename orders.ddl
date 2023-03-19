@@ -16,7 +16,8 @@ create table orders (
     delivery_time_from text,
     delivery_time_to text,
     items text[],
-    comment text
+    comment text,
+    status text
 )
 ;
 

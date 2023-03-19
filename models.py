@@ -3,45 +3,45 @@ from typing import Optional, List
 from pydantic import BaseModel, root_validator
 
 
-class Address(BaseModel):
+class Point(BaseModel):
     address: str
     lat: float
     lon: float
 
 
-class AddressSearch(Address):
+class PointSearch(Point):
     address: Optional[str]
     lat: Optional[float]
     lon: Optional[float]
 
 
 address_list = [
-    Address(
+    Point(
         address="Москва, Красная пл., 1",
         lat=55.7536155,
         lon=37.6099764,
     ),
-    Address(
+    Point(
         address="Москва, Новая пл., 3/4",
         lat=55.7540458,
         lon=37.6020905,
     ),
-    Address(
+    Point(
         address="Москва, Лаврушинский пер., 10",
         lat=55.7529808,
         lon=37.5961969,
     ),
-    Address(
+    Point(
         address="Москва, ул. Крымский Вал, 10",
         lat=55.7403892,
         lon=37.6058248
     ),
-    Address(
+    Point(
         address="Москва, ул. Вавилова, 57",
         lat=55.74709,
         lon=37.4990148,
     ),
-    Address(
+    Point(
         address="Москва, Зубовский б-р, 2",
         lat=55.7399023,
         lon=37.5665621,
@@ -61,11 +61,12 @@ class Item(BaseModel):
 
 
 class OrderBase(BaseModel):
-    address: Address
+    point: Point
     payment_method: str
     delivery_slot: TimeSlot
     items: List[Item]
     comment: str
+    status: str
 
     def flatten(self):
         def _items_flatten(items: List[Item]) -> List[str]:
@@ -76,7 +77,7 @@ class OrderBase(BaseModel):
             return res
 
         return (
-            self.address.address, self.address.lat, self.address.lon, self.payment_method, self.delivery_slot.date,
+            self.point.address, self.point.lat, self.point.lon, self.payment_method, self.delivery_slot.date,
             self.delivery_slot.time_from, self.delivery_slot.time_to, _items_flatten(self.items), self.comment
         )
 
@@ -87,18 +88,19 @@ class OrderBase(BaseModel):
 
 
 class OrderCreate(OrderBase):
-    pass
+    status: str = 'NEW'
 
 
 class OrderUpdate(BaseModel):
-    address: Optional[Address]
+    point: Optional[Point]
     payment_method: Optional[str]
     delivery_slot: Optional[TimeSlot]
     comment: Optional[str]
+    status: Optional[str]
 
     @root_validator
     def not_empty(cls, v):
-        if v.get('address') is None and v.get('payment_method') is None and v.get('delivery_slot') is None and v.get('comment') is None:
+        if any(a is not None for a in v.dict()):
             raise ValueError('Empty update')
         return v
 

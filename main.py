@@ -1,8 +1,8 @@
 from typing import List
 from random import choices
-from datetime import date, timedelta
+from datetime import date
 
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI, Depends, Request, Query
 import asyncpg
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -67,53 +67,37 @@ async def update_order(
 
 @app.get("/addresses/my", summary="Список избранных адресов пользователя")
 async def get_addresses(
-) -> List[Address]:
+) -> List[Point]:
 
     return address_list
 
 
 @app.post("/addresses/search", summary="Поиск полного адреса по части адреса или по координатам", description="Выдает 3 случайных адреса из списка")
 async def search_addresses(
-    address: AddressSearch,
-) -> List[Address]:
+    point: PointSearch,
+) -> List[Point]:
 
     return choices(address_list, k=3)
 
 
-@app.get("/slots", summary="Список слотов на сегодня и завтра")
+@app.get("/slots", summary="Список слотов на заданную дату (по умолчанию сегодня)")
 async def get_slots(
+    d: str = Query(f'{date.today():%Y-%m-%d}', regex=r'\d\d\d\d-\d\d-\d\d')
 ) -> List[TimeSlot]:
-    today = f'{date.today():%Y-%m-%d}'
-    tomorrow = f'{date.today() + timedelta(days=1):%Y-%m-%d}'
 
     return [
         TimeSlot(
-            date=today,
+            date=d,
             time_from='12:00',
             time_to='14:00',
         ),
         TimeSlot(
-            date=today,
+            date=d,
             time_from='14:00',
             time_to='16:00',
         ),
         TimeSlot(
-            date=today,
-            time_from='16:00',
-            time_to='18:00',
-        ),
-        TimeSlot(
-            date=tomorrow,
-            time_from='12:00',
-            time_to='14:00',
-        ),
-        TimeSlot(
-            date=tomorrow,
-            time_from='14:00',
-            time_to='16:00',
-        ),
-        TimeSlot(
-            date=tomorrow,
+            date=d,
             time_from='16:00',
             time_to='18:00',
         ),

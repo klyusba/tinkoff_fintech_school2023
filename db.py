@@ -7,7 +7,7 @@ from models import *
 def _order_from_row(row: asyncpg.Record) -> Order:
     return Order(
         id=row['id'],
-        address=Address(
+        point=Point(
             address=row['address'],
             lat=row['lat'],
             lon=row['lon'],
@@ -23,13 +23,14 @@ def _order_from_row(row: asyncpg.Record) -> Order:
             for n, p in zip(row['items'], row['items'][1:])
         ],
         comment=row['comment'],
+        status=row['status']
     )
 
 
 async def get_orders(conn: asyncpg.Connection, limit: int = 5) -> List[Order]:
     sql = f"""
         select 
-            id, address, lat, lon, payment_method, delivery_dt, delivery_time_from, delivery_time_to, items, comment 
+            id, address, lat, lon, payment_method, delivery_dt, delivery_time_from, delivery_time_to, items, comment, status
         from orders
         order by id desc
         limit {limit}
@@ -43,8 +44,8 @@ async def get_orders(conn: asyncpg.Connection, limit: int = 5) -> List[Order]:
 
 async def create_order(conn: asyncpg.Connection, order: OrderCreate) -> Order:
     row = await conn.fetchrow("""
-        INSERT INTO orders (address, lat, lon, payment_method, delivery_dt, delivery_time_from, delivery_time_to, items, comment)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8 ::text[], $9)
+        INSERT INTO orders (address, lat, lon, payment_method, delivery_dt, delivery_time_from, delivery_time_to, items, comment, status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8 ::text[], $9, $10)
         RETURNING *
     """, *order.flatten()
     )
@@ -56,17 +57,17 @@ async def update_order(conn: asyncpg.Connection, order_id: int, order: OrderUpda
     update = []
     args = [order_id, ]
 
-    if order.address is not None:
+    if order.point is not None:
         update.append(f'address = ${i}')
-        args.append(order.address.address)
+        args.append(order.point.address)
         i += 1
 
         update.append(f'lat = ${i}')
-        args.append(order.address.lat)
+        args.append(order.point.lat)
         i += 1
 
         update.append(f'lon = ${i}')
-        args.append(order.address.lon)
+        args.append(order.point.lon)
         i += 1
 
     if order.payment_method is not None:
@@ -90,6 +91,10 @@ async def update_order(conn: asyncpg.Connection, order_id: int, order: OrderUpda
     if order.comment is not None:
         update.append(f'comment = ${i}')
         args.append(order.comment)
+
+    if order.status is not None:
+        update.append(f'status = ${i}')
+        args.append(order.status)
 
     update = ', '.join(update)
     row = await conn.fetchrow(f"""
