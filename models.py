@@ -1,4 +1,5 @@
 from typing import Optional, List
+from enum import Enum
 
 from pydantic import BaseModel, root_validator
 
@@ -60,9 +61,14 @@ class Item(BaseModel):
     price: int
 
 
+class PaymentMethod(str, Enum):
+    CARD = 'CARD'
+    CASH = 'CASH'
+
+
 class OrderBase(BaseModel):
     point: Point
-    payment_method: str
+    payment_method: PaymentMethod
     delivery_slot: TimeSlot
     items: List[Item]
     comment: str
@@ -93,7 +99,7 @@ class OrderCreate(OrderBase):
 
 class OrderUpdate(BaseModel):
     point: Optional[Point]
-    payment_method: Optional[str]
+    payment_method: Optional[PaymentMethod]
     delivery_slot: Optional[TimeSlot]
     comment: Optional[str]
     status: Optional[str]
