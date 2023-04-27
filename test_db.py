@@ -41,7 +41,7 @@ async def conn() -> asyncpg.Connection:
 @pytest.fixture
 def order_sample():
     return OrderCreate(
-        address=address_list[0],
+        point=address_list[0],
         payment_method='CARD',
         delivery_slot=TimeSlot(
             date='2023-05-01',

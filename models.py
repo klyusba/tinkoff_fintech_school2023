@@ -84,7 +84,8 @@ class OrderBase(BaseModel):
 
         return (
             self.point.address, self.point.lat, self.point.lon, self.payment_method, self.delivery_slot.date,
-            self.delivery_slot.time_from, self.delivery_slot.time_to, _items_flatten(self.items), self.comment
+            self.delivery_slot.time_from, self.delivery_slot.time_to, _items_flatten(self.items), self.comment,
+            self.status
         )
 
     def __eq__(self, other):
@@ -106,7 +107,7 @@ class OrderUpdate(BaseModel):
 
     @root_validator
     def not_empty(cls, v):
-        if any(a is not None for a in v.dict()):
+        if not v or all(a is None for a in v.values()):
             raise ValueError('Empty update')
         return v
 
