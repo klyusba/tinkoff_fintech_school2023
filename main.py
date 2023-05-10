@@ -24,7 +24,7 @@ async def startup():
     )
     app.state.pool = pool
 
-    limiter = Limiter(key_func=get_remote_address, application_limits=['10/minute'])
+    limiter = Limiter(key_func=get_remote_address, application_limits=['50/minute'])
     app.state.limiter = limiter
 
 

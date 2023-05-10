@@ -91,10 +91,12 @@ async def update_order(conn: asyncpg.Connection, order_id: int, order: OrderUpda
     if order.comment is not None:
         update.append(f'comment = ${i}')
         args.append(order.comment)
+        i += 1
 
     if order.status is not None:
         update.append(f'status = ${i}')
         args.append(order.status)
+        i += 1
 
     update = ', '.join(update)
     row = await conn.fetchrow(f"""
