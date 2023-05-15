@@ -20,7 +20,7 @@ def _order_from_row(row: asyncpg.Record) -> Order:
         ),
         items=[
             Item(name=n, price=int(p))
-            for n, p in zip(row['items'], row['items'][1:])
+            for n, p in zip(row['items'][::2], row['items'][1::2])
         ],
         comment=row['comment'],
         status=row['status']
@@ -40,6 +40,18 @@ async def get_orders(conn: asyncpg.Connection, limit: int = 5) -> List[Order]:
         _order_from_row(row)
         for row in rows
     ]
+
+
+async def get_order(conn: asyncpg.Connection, id: int) -> Order:
+    sql = """
+        select 
+            id, address, lat, lon, payment_method, delivery_dt, delivery_time_from, delivery_time_to, items, comment, status
+        from orders
+        where
+            id = $1
+    """
+    row = await conn.fetchrow(sql, id)
+    return _order_from_row(row)
 
 
 async def create_order(conn: asyncpg.Connection, order: OrderCreate) -> Order:

@@ -53,6 +53,10 @@ def order_sample():
                 name='Чайник',
                 price=3500,
             ),
+            Item(
+                name='Утюг',
+                price=3000,
+            ),
         ],
         comment='Позвонить за час'
     )
@@ -67,6 +71,12 @@ async def test_create(conn: asyncpg.Connection, order_sample: OrderCreate):
 @pytest.mark.asyncio
 async def test_select(conn: asyncpg.Connection, order_sample: OrderCreate):
     new_order, = await db.get_orders(conn, limit=1)
+    assert order_sample == new_order
+
+
+@pytest.mark.asyncio
+async def test_select(conn: asyncpg.Connection, order_sample: OrderCreate):
+    new_order = await db.get_order(conn, id=1)
     assert order_sample == new_order
 
 

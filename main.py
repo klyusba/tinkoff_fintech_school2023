@@ -65,6 +65,15 @@ async def update_order(
     return new_order
 
 
+@app.get("/orders/{order_id}", summary="Информация по заказу")
+async def get_order(
+    order_id: int,
+    conn: asyncpg.Connection = Depends(get_connection),
+) -> Order:
+    order = await db.get_order(conn, order_id)
+    return order
+
+
 @app.get("/addresses/my", summary="Список избранных адресов пользователя")
 async def get_addresses(
 ) -> List[Point]:
